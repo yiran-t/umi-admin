@@ -12,7 +12,7 @@ import './index.less'
 const { Header, Content, Footer, Sider } = Layout;
 
 type MenuItem = Required<MenuProps>['items'][number];
-
+// 造菜单数据方法
 function getItem(
   label: React.ReactNode,
   key: React.Key,
@@ -41,12 +41,14 @@ const items: MenuItem[] = [
 
 const App: React.FC = () => {
   const [collapsed, setCollapsed] = useState(false);
-  const [menuList, setMenuList] = useState(items);
-  const [menuId, setMenuId] = useState('1')
   const [form] = Form.useForm();
+  // 菜单列表
+  const [menuList, setMenuList] = useState(items);
+  // 选择的菜单id
+  const [menuId, setMenuId] = useState('1')
+  // form表单提交 并修改菜单label
   const onFinish = ({menuName}: any) => {
     console.log('Success:', menuName);
-    console.log(menuId);
     const newMenuList =  menuList.map((item:any) => {
       if (item.children) {
         item.children.forEach((ite: { key: string; label: string; }) => {
@@ -66,6 +68,7 @@ const App: React.FC = () => {
   const onFinishFailed = (errorInfo: any) => {
     console.log('Failed:', errorInfo);
   };
+  // 选择菜单的方法 并更新 form表单值
   const selectMenu = (val: any) => {
     setMenuId(val.key)
     let menuName = ''
