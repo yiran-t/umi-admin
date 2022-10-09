@@ -1,9 +1,139 @@
-import styles from './index.less';
+import {
+  DesktopOutlined,
+  FileOutlined,
+  PieChartOutlined,
+  TeamOutlined,
+  UserOutlined,
+} from '@ant-design/icons';
+import type { MenuProps } from 'antd';
+import { Breadcrumb, Layout, Menu, Button, Form, Input } from 'antd';
+import React, { useState, useEffect } from 'react';
+import './index.less'
+const { Header, Content, Footer, Sider } = Layout;
 
-export default function IndexPage() {
-  return (
-    <div>
-      <h1 className={styles.title}>Page index</h1>
-    </div>
-  );
+type MenuItem = Required<MenuProps>['items'][number];
+
+function getItem(
+  label: React.ReactNode,
+  key: React.Key,
+  icon?: React.ReactNode,
+  children?: MenuItem[],
+): MenuItem {
+  return {
+    key,
+    icon,
+    children,
+    label,
+  } as MenuItem;
 }
+
+const items: MenuItem[] = [
+  getItem('Option 1', '1', <PieChartOutlined />),
+  getItem('Option 2', '2', <DesktopOutlined />),
+  getItem('User', 'sub1', <UserOutlined />, [
+    getItem('Tom', '3'),
+    getItem('Bill', '4'),
+    getItem('Alex', '5'),
+  ]),
+  getItem('Team', 'sub2', <TeamOutlined />, [getItem('Team 1', '6'), getItem('Team 2', '8')]),
+  getItem('Files', '9', <FileOutlined />),
+];
+
+const App: React.FC = () => {
+  const [collapsed, setCollapsed] = useState(false);
+  const [menuList, setMenuList] = useState(items);
+  const [menuId, setMenuId] = useState('1')
+  const [form] = Form.useForm();
+  const onFinish = ({menuName}: any) => {
+    console.log('Success:', menuName);
+    console.log(menuId);
+    const newMenuList =  menuList.map((item:any) => {
+      if (item.children) {
+        item.children.forEach((ite: { key: string; label: string; }) => {
+          if(ite.key === menuId){
+            ite.label = menuName
+          }
+        });
+      } else {
+        if(item.key === menuId){
+          item.label = menuName
+        }
+      }
+      return item;
+    })
+    setMenuList(newMenuList)
+  };
+  const onFinishFailed = (errorInfo: any) => {
+    console.log('Failed:', errorInfo);
+  };
+  const selectMenu = (val: any) => {
+    setMenuId(val.key)
+    let menuName = ''
+    menuList.forEach((item:any) => {
+      if (item.children) {
+        item.children.forEach((ite: { key: string; label: string; }) => {
+          if(ite.key === val.key){
+            menuName = ite.label
+          }
+        });
+      } else {
+        if(item.key === val.key){
+          menuName = item.label
+        }
+      }
+    })
+    form.setFieldsValue({
+      menuName,
+    });
+  }
+  useEffect(()=>{
+    selectMenu({key: menuId})
+  },[])
+  return (
+    <Layout style={{ minHeight: '100vh' }}>
+      <Sider collapsible collapsed={collapsed} onCollapse={value => setCollapsed(value)}>
+        <div className="logo" />
+        <Menu theme="dark" defaultSelectedKeys={['1']} mode="inline" items={menuList} onSelect={selectMenu} />
+      </Sider>
+      <Layout className="site-layout">
+        <Header className="site-layout-background" style={{ padding: 0 }} />
+        <Content style={{ margin: '0 16px' }}>
+          <Breadcrumb style={{ margin: '16px 0' }}>
+            <Breadcrumb.Item>User</Breadcrumb.Item>
+            <Breadcrumb.Item>Bill</Breadcrumb.Item>
+          </Breadcrumb>
+          <div className="site-layout-background" style={{ padding: 24, minHeight: 360 }}>
+            <Form
+              name="basic"
+              labelCol={{ span: 2 }}
+              wrapperCol={{ span: 8 }}
+              initialValues={{ remember: true }}
+              onFinish={onFinish}
+              onFinishFailed={onFinishFailed}
+              autoComplete="off"
+              form={form}
+            >
+              <Form.Item
+                label="菜单名字"
+                name="menuName"
+                rules={[
+                  { required: true, message: '请选择菜单' }
+                ]}
+              >
+                <Input placeholder='请选择菜单' />
+              </Form.Item>
+              <Form.Item wrapperCol={{ offset: 2, span: 8 }}>
+                <Button type="primary" htmlType="submit">
+                  保存
+                </Button>
+              </Form.Item>
+            </Form>
+          </div>
+        </Content>
+        <Footer style={{ textAlign: 'center' }}>Ant Design ©2018 Created by Ant UED</Footer>
+      </Layout>
+    </Layout>
+  );
+};
+
+export default App;
